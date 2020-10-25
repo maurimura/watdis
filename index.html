@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=4, initial-scale=1.0" />
+        <title>Watdis</title>
+    </head>
+    <body>
+        <main class="camera">
+            <video id="video">Video stream not available.</video>
+            <canvas id="canvas"> </canvas>
+        </main>
+        <script>
+            let width = 320;
+            let height = 0;
+
+            let streaming = false;
+
+            let video = null;
+            let canvas = null;
+
+            function startup() {
+                video = document.getElementById("video");
+                canvas = document.getElementById("canvas");
+
+                navigator.mediaDevices
+                    .getUserMedia({ video: {facingMode: "environment"} })
+                    .then((stream) => {
+                        video.srcObject = stream;
+                        video.play();
+                    })
+                    .catch((err) => {
+                        alert(err);
+                    });
+                video.addEventListener(
+                    "canplay",
+                    (ev) => {
+                        if (!streaming) {
+                            height =
+                                video.videoHeight / (video.videoWidth / width);
+
+                            video.setAttribute("width", width);
+                            video.setAttribute("height", height);
+                            canvas.setAttribute("width", width);
+                            canvas.setAttribute("height", height);
+                        }
+                    },
+                    false
+                );
+            }
+            window.addEventListener("load", startup, false);
+        </script>
+    </body>
+</html>
