@@ -4,14 +4,17 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=4, initial-scale=1.0" />
         <title>Watdis</title>
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+        <link rel="stylesheet" href="styles.css" />
     </head>
     <body>
-        <main class="camera">
+        <main class="container">
             <video id="video">Video stream not available.</video>
             <canvas id="canvas"> </canvas>
         </main>
         <script>
-            let width = 320;
+            let width = 720;
             let height = 0;
 
             let streaming = false;
@@ -24,7 +27,7 @@
                 canvas = document.getElementById("canvas");
 
                 navigator.mediaDevices
-                    .getUserMedia({ video: {facingMode: "environment"} })
+                    .getUserMedia({ video: { facingMode: "environment" } })
                     .then((stream) => {
                         video.srcObject = stream;
                         video.play();
@@ -47,7 +50,30 @@
                     },
                     false
                 );
+
+                video.addEventListener("loadeddata", () => {
+                    cocoSsd.load().then((model) => detectObjects(model, video));
+                });
             }
+
+            function drawPredictions(predictions) {
+                canvas = document.getElementById("canvas");
+                const ctx = canvas.getContext("2d");
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                predictions.forEach(({ bbox, class: type }) => {
+                    const [x, y, w, h] = bbox;
+                    ctx.strokeRect(x, y, w, h);
+                });
+            }
+
+            function detectObjects(model, video) {
+                model.detect(video).then((predictions) => {
+                    drawPredictions(predictions);
+                    requestAnimationFrame(() => detectObjects(model, video));
+                });
+            }
+
             window.addEventListener("load", startup, false);
         </script>
     </body>
