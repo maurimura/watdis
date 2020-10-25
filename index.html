@@ -13,68 +13,7 @@
             <video id="video">Video stream not available.</video>
             <canvas id="canvas"> </canvas>
         </main>
-        <script>
-            let width = 720;
-            let height = 0;
-
-            let streaming = false;
-
-            let video = null;
-            let canvas = null;
-
-            function startup() {
-                video = document.getElementById("video");
-                canvas = document.getElementById("canvas");
-
-                navigator.mediaDevices
-                    .getUserMedia({ video: { facingMode: "environment" } })
-                    .then((stream) => {
-                        video.srcObject = stream;
-                        video.play();
-                    })
-                    .catch((err) => {
-                        alert(err);
-                    });
-                video.addEventListener(
-                    "canplay",
-                    (ev) => {
-                        if (!streaming) {
-                            height =
-                                video.videoHeight / (video.videoWidth / width);
-
-                            video.setAttribute("width", width);
-                            video.setAttribute("height", height);
-                            canvas.setAttribute("width", width);
-                            canvas.setAttribute("height", height);
-                        }
-                    },
-                    false
-                );
-
-                video.addEventListener("loadeddata", () => {
-                    cocoSsd.load().then((model) => detectObjects(model, video));
-                });
-            }
-
-            function drawPredictions(predictions) {
-                canvas = document.getElementById("canvas");
-                const ctx = canvas.getContext("2d");
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                predictions.forEach(({ bbox, class: type }) => {
-                    const [x, y, w, h] = bbox;
-                    ctx.strokeRect(x, y, w, h);
-                });
-            }
-
-            function detectObjects(model, video) {
-                model.detect(video).then((predictions) => {
-                    drawPredictions(predictions);
-                    requestAnimationFrame(() => detectObjects(model, video));
-                });
-            }
-
-            window.addEventListener("load", startup, false);
-        </script>
+        <script src="index.js"></script>
+        
     </body>
 </html>
